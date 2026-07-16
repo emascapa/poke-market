@@ -1,4 +1,4 @@
-// TSConfig for modules that run in Node.js environment via either transpilation or type-stripping.
+// TSConfig per i moduli che girano in ambiente Node.js tramite transpilazione o type-stripping.
 {
   "extends": "@tsconfig/node24/tsconfig.json",
   "include": [
