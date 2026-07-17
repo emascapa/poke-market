@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
@@ -18,6 +18,40 @@ const isAuthenticated = computed(() => auth.isAuthenticated)
 const cartCount = computed(() => cart.totalItems)
 const types = computed(() => pokemonStore.types)
 
+/* Stato del dropdown dei tipi */
+const dropdownOpen = ref(false)
+
+function toggleDropdown() {
+  dropdownOpen.value = !dropdownOpen.value
+}
+
+function closeDropdown() {
+  dropdownOpen.value = false
+}
+
+/* Chiude il dropdown se si clicca fuori da esso */
+function onDocumentClick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('.app-header__types-menu')) {
+    closeDropdown()
+  }
+}
+
+/* Chiude il dropdown con il tasto Escape */
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') closeDropdown()
+}
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onKeydown)
+})
+
 function handleLogout() {
   auth.logout()
   router.push({ name: 'home' })
@@ -33,25 +67,60 @@ function handleLogout() {
         <span class="app-header__name">PokéMarket</span>
       </RouterLink>
 
-      <!-- Navigazione tipi (categorie) -->
-      <nav class="app-header__nav" aria-label="Filtra per tipo">
-        <RouterLink
-          :to="{ name: 'home' }"
-          class="app-header__nav-link app-header__nav-link--all"
-          :class="{ 'app-header__nav-link--active': $route.name === 'home' && !$route.query.category }"
+      <!-- Dropdown tipi -->
+      <div class="app-header__types-menu">
+        <button
+          class="app-header__types-btn"
+          :class="{ 'app-header__types-btn--open': dropdownOpen }"
+          :aria-expanded="dropdownOpen"
+          aria-haspopup="listbox"
+          @click.stop="toggleDropdown"
         >
-          All
-        </RouterLink>
-        <RouterLink
-          v-for="type in types"
-          :key="type.name"
-          :to="{ name: 'home', query: { category: type.name } }"
-          class="app-header__nav-link"
-          :class="{ 'app-header__nav-link--active': $route.query.category === type.name }"
-        >
-          {{ type.name }}
-        </RouterLink>
-      </nav>
+          Types
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+
+        <Transition name="dropdown">
+          <div
+            v-if="dropdownOpen"
+            class="app-header__dropdown"
+            role="listbox"
+            aria-label="Pokemon types"
+          >
+            <!-- Opzione "All" -->
+            <RouterLink
+              role="option"
+              :to="{ name: 'home' }"
+              class="app-header__dropdown-item app-header__dropdown-item--all"
+              :class="{ 'app-header__dropdown-item--active': $route.name === 'home' && !$route.query.category }"
+              :aria-selected="$route.name === 'home' && !$route.query.category"
+              @click="closeDropdown"
+            >
+              All
+            </RouterLink>
+
+            <!-- Lista tipi -->
+            <RouterLink
+              v-for="type in types"
+              :key="type.name"
+              role="option"
+              :to="{ name: 'home', query: { category: type.name } }"
+              class="app-header__dropdown-item"
+              :class="[
+                `app-header__dropdown-item--${type.name}`,
+                { 'app-header__dropdown-item--active': $route.query.category?.includes(type.name) },
+              ]"
+              :aria-selected="$route.query.category?.includes(type.name)"
+              @click="closeDropdown"
+            >
+              <span class="app-header__dropdown-dot" :class="`app-header__dropdown-dot--${type.name}`" aria-hidden="true" />
+              {{ type.name }}
+            </RouterLink>
+          </div>
+        </Transition>
+      </div>
 
       <!-- Azioni utente -->
       <div class="app-header__actions">
@@ -139,29 +208,81 @@ function handleLogout() {
     white-space: nowrap;
   }
 
-  /* Navigazione tipi */
-  &__nav {
-    display: flex;
-    align-items: center;
-    gap: $space-1;
-    overflow-x: auto;
-    scrollbar-width: none;
+  /* Dropdown wrapper */
+  &__types-menu {
+    position: relative;
     flex: 1;
-    padding: 0 $space-2;
-
-    /* Nasconde la scrollbar su Webkit */
-    &::-webkit-scrollbar { display: none; }
   }
 
-  &__nav-link {
-    padding: $space-1 $space-3;
+  /* Pulsante "Types" */
+  &__types-btn {
+    @include flex-center;
+    gap: $space-1;
+    padding: $space-2 $space-4;
+    border: 1.5px solid var(--color-border);
     border-radius: $radius-full;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    white-space: nowrap;
+    color: var(--color-text);
+    background: var(--color-bg-card);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+                background-color var(--transition-fast);
+
+    svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--transition-fast);
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      outline: none;
+    }
+
+    &--open {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+
+      svg { transform: rotate(180deg); }
+    }
+  }
+
+  /* Pannello dropdown */
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + $space-2);
+    left: 0;
+    min-width: 200px;
+    max-height: 380px;
+    overflow-y: auto;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    box-shadow: var(--shadow-card-hover);
+    padding: $space-2 0;
+    z-index: $z-dropdown;
+    /* Griglia a 2 colonne per sfruttare meglio lo spazio */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  /* Voci del dropdown */
+  &__dropdown-item {
+    @include flex-center;
+    justify-content: flex-start;
+    gap: $space-2;
+    padding: $space-2 $space-4;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    text-transform: capitalize;
     color: var(--color-text-muted);
     text-decoration: none;
-    text-transform: capitalize;
     transition: background-color var(--transition-fast), color var(--transition-fast);
 
     &:hover,
@@ -171,15 +292,30 @@ function handleLogout() {
       outline: none;
     }
 
-    &--active {
-      background-color: var(--color-primary);
-      color: #fff;
-
-      &:hover { background-color: var(--color-primary-hover); }
+    /* "All" occupa tutta la larghezza */
+    &--all {
+      grid-column: 1 / -1;
+      font-weight: $font-weight-bold;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: $space-1;
     }
 
-    &--all {
+    &--active {
+      color: var(--color-primary);
       font-weight: $font-weight-bold;
+    }
+  }
+
+  /* Pallino colorato per il tipo */
+  &__dropdown-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-border);
+
+    @each $name, $color in $type-colors {
+      &--#{$name} { background-color: $color; }
     }
   }
 
@@ -265,15 +401,21 @@ function handleLogout() {
     }
   }
 
-  /* Responsive: nascondi nav tipi su schermi piccoli */
-  @include respond-to(md) {
-    &__nav {
-      display: none;
-    }
-  }
-
   @include respond-to(sm) {
     &__name { display: none; }
   }
+}
+
+/* Animazione apertura/chiusura dropdown */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transform-origin: top left;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: scaleY(0.92) translateY(-4px);
 }
 </style>
