@@ -158,7 +158,10 @@ watch(() => props.id, loadData, { immediate: true })
           <p class="detail-card__price">€{{ price.toFixed(2) }}</p>
 
           <!-- Descrizione dalla specie -->
-          <p v-if="description" class="detail-card__description">{{ description }}</p>
+          <div v-if="description" class="detail-card__about">
+            <h2 class="detail-card__about-title">About</h2>
+            <p class="detail-card__description">{{ description }}</p>
+          </div>
 
           <!-- Dati fisici -->
           <div class="detail-card__meta">
@@ -350,6 +353,19 @@ watch(() => props.id, loadData, { immediate: true })
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: var(--color-primary);
+  }
+
+  &__about {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__about-title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: var(--color-text);
+    letter-spacing: 0.8px;
   }
 
   &__description {
