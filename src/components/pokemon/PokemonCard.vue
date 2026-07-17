@@ -1,0 +1,263 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import type { Pokemon } from '@/types/pokemon'
+import { useCartStore } from '@/stores/cart'
+import { useWishlistStore } from '@/stores/wishlist'
+import { useAuthStore } from '@/stores/auth'
+import { getPokemonImage } from '@/utils/priceCalculator'
+import TypeBadge from '@/components/ui/TypeBadge.vue'
+
+const props = defineProps<{
+  pokemon: Pokemon
+  price: number
+}>()
+
+const router = useRouter()
+const cart = useCartStore()
+const wishlist = useWishlistStore()
+const auth = useAuthStore()
+
+const image = computed(() => getPokemonImage(props.pokemon.sprites))
+const wishlisted = computed(() => wishlist.isWishlisted(props.pokemon.id))
+const inCart = computed(() => cart.items.some((i) => i.pokemon.id === props.pokemon.id))
+
+function goToDetail() {
+  router.push({ name: 'pokemon-detail', params: { id: props.pokemon.id } })
+}
+
+function handleAddToCart(event: Event) {
+  /* Impedisce la navigazione al dettaglio quando si clicca il pulsante */
+  event.stopPropagation()
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: `/cart` } })
+    return
+  }
+  cart.addToCart(props.pokemon)
+}
+
+function handleToggleWishlist(event: Event) {
+  event.stopPropagation()
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: `/wishlist` } })
+    return
+  }
+  wishlist.toggleWishlist(props.pokemon)
+}
+</script>
+
+<template>
+  <article
+    class="pokemon-card"
+    :class="{ 'pokemon-card--in-cart': inCart }"
+    tabindex="0"
+    role="button"
+    :aria-label="`${pokemon.name}, $${price}`"
+    @click="goToDetail"
+    @keydown.enter="goToDetail"
+    @keydown.space.prevent="goToDetail"
+  >
+    <!-- Immagine pokemon -->
+    <div class="pokemon-card__image-wrap">
+      <img
+        :src="image"
+        :alt="pokemon.name"
+        class="pokemon-card__image"
+        loading="lazy"
+        width="200"
+        height="200"
+      />
+    </div>
+
+    <!-- Corpo della card -->
+    <div class="pokemon-card__body">
+      <!-- Numero Pokédex -->
+      <span class="pokemon-card__id">#{{ String(pokemon.id).padStart(4, '0') }}</span>
+
+      <!-- Nome -->
+      <h2 class="pokemon-card__name">{{ pokemon.name }}</h2>
+
+      <!-- Badge tipi -->
+      <div class="pokemon-card__types">
+        <TypeBadge
+          v-for="entry in pokemon.types"
+          :key="entry.slot"
+          :type="entry.type.name"
+        />
+      </div>
+
+      <!-- Prezzo -->
+      <p class="pokemon-card__price">${{ price.toFixed(2) }}</p>
+    </div>
+
+    <!-- Azioni -->
+    <div class="pokemon-card__actions">
+      <!-- Wishlist toggle -->
+      <button
+        class="pokemon-card__wishlist-btn"
+        :class="{ 'pokemon-card__wishlist-btn--active': wishlisted }"
+        :aria-label="wishlisted ? 'Rimuovi dalla wishlist' : 'Aggiungi alla wishlist'"
+        :aria-pressed="wishlisted"
+        @click="handleToggleWishlist"
+      >
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+      </button>
+
+      <!-- Aggiungi al carrello -->
+      <button
+        class="pokemon-card__cart-btn"
+        :aria-label="`Aggiungi ${pokemon.name} al carrello`"
+        @click="handleAddToCart"
+      >
+        {{ inCart ? 'Nel carrello ✓' : 'Aggiungi' }}
+      </button>
+    </div>
+  </article>
+</template>
+
+<style scoped lang="scss">
+@use '@/assets/styles/variables' as *;
+@use '@/assets/styles/mixins' as *;
+
+.pokemon-card {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+
+  /* Animazione hover */
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &--in-cart {
+    outline: 2px solid var(--color-success);
+    outline-offset: 2px;
+  }
+
+  /* Area immagine con sfondo sfumato */
+  &__image-wrap {
+    background: linear-gradient(135deg, var(--color-border) 0%, var(--color-bg) 100%);
+    padding: $space-5;
+    @include flex-center;
+    min-height: 160px;
+  }
+
+  &__image {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    transition: transform var(--transition-base);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+
+    .pokemon-card:hover & {
+      transform: scale(1.08);
+    }
+  }
+
+  /* Corpo */
+  &__body {
+    flex: 1;
+    padding: $space-3 $space-4 $space-2;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__id {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    font-weight: $font-weight-medium;
+  }
+
+  &__name {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    text-transform: capitalize;
+    @include truncate;
+    color: var(--color-text);
+  }
+
+  &__types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-1;
+  }
+
+  &__price {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--color-primary);
+    margin-top: auto;
+  }
+
+  /* Azioni */
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-4 $space-4;
+  }
+
+  &__wishlist-btn {
+    @include flex-center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--color-border);
+    border-radius: $radius-base;
+    color: var(--color-text-muted);
+    transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+    background: transparent;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: #e53935;
+      color: #e53935;
+      outline: none;
+    }
+
+    &--active {
+      border-color: #e53935;
+      color: #fff;
+      background-color: #e53935;
+
+      svg { fill: currentColor; }
+    }
+  }
+
+  &__cart-btn {
+    flex: 1;
+    padding: $space-2 $space-3;
+    border-radius: $radius-base;
+    background-color: var(--color-primary);
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    @include truncate;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--color-primary-hover);
+      outline: none;
+    }
+  }
+}
+</style>

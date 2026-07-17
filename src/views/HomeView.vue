@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+// Contenuto provvisorio — verrà completato nella Fase 6
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="home-placeholder">
+    <p>Home — in costruzione</p>
+  </div>
 </template>
