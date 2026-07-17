@@ -151,8 +151,8 @@ function handleToggleWishlist(event: Event) {
   }
 
   &__image {
-    width: 120px;
-    height: 120px;
+    // width: 120px;
+    // height: 120px;
     object-fit: contain;
     /* La resa bicubica predefinita (auto) è ottimale per l'official artwork in alta risoluzione.
        pixelated/crisp-edges usavano nearest-neighbor che causa l'effetto "impastato" su immagini smooth. */

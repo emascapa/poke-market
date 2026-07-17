@@ -6,6 +6,7 @@ import {
   fetchPokemonList,
   fetchTypes,
 } from '@/services/pokeApi'
+import { extractPokemonIdFromUrl } from '@/utils/priceCalculator'
 import type { NamedAPIResource, Pokemon, PokemonListItem } from '@/types/pokemon'
 
 const PAGINA_SIZE = 20
@@ -28,7 +29,7 @@ export const usePokemonStore = defineStore('pokemon', () => {
   const pokemonList = ref<PokemonListItem[]>([])
   const totalCount = ref(0)
   const currentPage = ref(0)
-  const currentType = ref<string | null>(null)
+  const currentTypes = ref<string[]>([])
 
   // ----------------------------------------------------------------
   // Stato di caricamento e gestione errori
@@ -60,19 +61,40 @@ export const usePokemonStore = defineStore('pokemon', () => {
 
   /**
    * Carica una pagina di pokemon.
-   * Se viene passato un tipo, filtra per quel tipo (paginazione lato client).
-   * Altrimenti usa la paginazione nativa dell'API.
+   * - 0 tipi  → paginazione nativa API
+   * - 1 tipo  → filtra per tipo (paginazione lato client)
+   * - 2 tipi  → intersezione dei due tipi (fetch parallelo + paginazione lato client)
    */
-  async function loadPokemonList(page = 0, typeName: string | null = null): Promise<void> {
+  async function loadPokemonList(page = 0, types: string[] = []): Promise<void> {
     isLoading.value = true
     error.value = null
     currentPage.value = page
-    currentType.value = typeName
+    currentTypes.value = types
 
     try {
-      if (typeName) {
-        // Il tipo restituisce tutti i pokemon associati: impaginiamo lato client
-        const typeDetail = await fetchPokemonByType(typeName)
+      if (types.length === 2) {
+        /* Fetch parallelo: recupera tutti i pokemon di entrambi i tipi */
+        const [detail1, detail2] = await Promise.all([
+          fetchPokemonByType(types[0]!),
+          fetchPokemonByType(types[1]!),
+        ])
+
+        /* Calcola l'intersezione: pokemon che appartengono a ENTRAMBI i tipi */
+        const type2Ids = new Set(
+          detail2.pokemon.map((e) => extractPokemonIdFromUrl(e.pokemon.url)),
+        )
+        const intersection = detail1.pokemon.filter((e) =>
+          type2Ids.has(extractPokemonIdFromUrl(e.pokemon.url)),
+        )
+
+        totalCount.value = intersection.length
+        const start = page * PAGINA_SIZE
+        pokemonList.value = intersection
+          .slice(start, start + PAGINA_SIZE)
+          .map((entry) => entry.pokemon)
+      } else if (types.length === 1) {
+        /* Il tipo restituisce tutti i pokemon associati: impaginiamo lato client */
+        const typeDetail = await fetchPokemonByType(types[0]!)
         totalCount.value = typeDetail.pokemon.length
         const start = page * PAGINA_SIZE
         pokemonList.value = typeDetail.pokemon
@@ -84,7 +106,7 @@ export const usePokemonStore = defineStore('pokemon', () => {
         pokemonList.value = response.results
       }
     } catch (e) {
-      error.value = 'Errore durante il caricamento dei Pokémon. Riprova più tardi.'
+      error.value = 'Error loading Pokémon. Please try again.'
       console.error(e)
     } finally {
       isLoading.value = false
@@ -116,7 +138,7 @@ export const usePokemonStore = defineStore('pokemon', () => {
     pokemonList,
     totalCount,
     currentPage,
-    currentType,
+    currentTypes,
     isLoading,
     error,
     totalPages,

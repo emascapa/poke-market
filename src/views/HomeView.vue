@@ -7,6 +7,7 @@ import PokemonGrid from '@/components/pokemon/PokemonGrid.vue'
 import PokemonTypeFilter from '@/components/pokemon/PokemonTypeFilter.vue'
 import PokemonPagination from '@/components/pokemon/PokemonPagination.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
+import { extractPokemonIdFromUrl } from '@/utils/priceCalculator'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,20 +18,20 @@ const loadedPokemons = ref<Pokemon[]>([])
 /* Caricamento secondario: fetch dei dettagli di ciascun pokemon nella pagina */
 const isFetchingDetails = ref(false)
 
-const activeType = computed(() =>
-  typeof route.query.category === 'string' ? route.query.category : null,
-)
-
-/* Estrae l'ID numerico dall'URL PokeAPI (es. ".../pokemon/25/") */
-function extractId(url: string): number {
-  const parts = url.split('/').filter(Boolean)
-  return parseInt(parts[parts.length - 1] ?? '0', 10)
-}
+/**
+ * Legge ?category=fire oppure ?category=fire,water e restituisce un array.
+ * Compatibile con i link dell'header che usano ?category=fire (tipo singolo).
+ */
+const activeTypes = computed<string[]>(() => {
+  const raw = route.query.category
+  if (typeof raw !== 'string' || !raw) return []
+  return raw.split(',').filter(Boolean)
+})
 
 /* Carica la lista paginata, poi recupera i dettagli di ogni pokemon */
-async function fetchPage(page: number, typeName: string | null) {
+async function fetchPage(page: number, types: string[]) {
   loadedPokemons.value = []
-  await store.loadPokemonList(page, typeName)
+  await store.loadPokemonList(page, types)
 
   if (store.error) return
 
@@ -38,7 +39,7 @@ async function fetchPage(page: number, typeName: string | null) {
   isFetchingDetails.value = true
   try {
     const results = await Promise.all(
-      store.pokemonList.map((item) => store.loadPokemon(extractId(item.url))),
+      store.pokemonList.map((item) => store.loadPokemon(extractPokemonIdFromUrl(item.url))),
     )
     loadedPokemons.value = results.filter((p): p is Pokemon => p !== null)
   } finally {
@@ -48,30 +49,33 @@ async function fetchPage(page: number, typeName: string | null) {
 
 const isLoading = computed(() => store.isLoading || isFetchingDetails.value)
 
-/* Quando cambia il filtro tipo aggiorna l'URL e torna a pagina 0 */
-function onTypeChange(type: string | null) {
+/**
+ * Aggiorna l'URL quando l'utente cambia i tipi selezionati.
+ * 0 tipi → rimuove il parametro; 1-2 tipi → ?category=fire oppure ?category=fire,water
+ */
+function onTypesChange(types: string[]) {
   router.push({
     name: 'home',
-    query: type ? { category: type } : {},
+    query: types.length > 0 ? { category: types.join(',') } : {},
   })
 }
 
 /* Quando l'utente cambia pagina */
 function onPageChange(page: number) {
-  fetchPage(page, activeType.value)
+  fetchPage(page, activeTypes.value)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 /* Reagisce ai cambiamenti dell'URL (deep link e navigazione) */
 watch(
   () => route.query.category,
-  () => fetchPage(0, activeType.value),
+  () => fetchPage(0, activeTypes.value),
 )
 
 onMounted(async () => {
   /* Carica i tipi per il filtro se non sono già stati caricati */
   await store.loadTypes()
-  fetchPage(0, activeType.value)
+  fetchPage(0, activeTypes.value)
 })
 </script>
 
@@ -81,15 +85,15 @@ onMounted(async () => {
       <!-- Filtro per tipo (categorie) -->
       <PokemonTypeFilter
         :types="store.types"
-        :active-type="activeType"
-        @update:active-type="onTypeChange"
+        :active-types="activeTypes"
+        @update:active-types="onTypesChange"
       />
 
       <!-- Griglia pokemon o messaggio di errore -->
       <ErrorMessage
         v-if="store.error && !isLoading"
         :message="store.error"
-        @retry="fetchPage(store.currentPage, activeType)"
+        @retry="fetchPage(store.currentPage, activeTypes)"
       />
 
       <template v-else>

@@ -1,6 +1,15 @@
 import type { FlavorTextEntry, Pokemon, PokemonStat } from '@/types/pokemon'
 
 /**
+ * Estrae l'ID numerico dall'URL di una risorsa PokeAPI.
+ * Es. "https://pokeapi.co/api/v2/pokemon/25/" → 25
+ */
+export function extractPokemonIdFromUrl(url: string): number {
+  const parts = url.split('/').filter(Boolean)
+  return parseInt(parts[parts.length - 1] ?? '0', 10)
+}
+
+/**
  * Calcola il prezzo di vendita di un pokemon a partire dalle sue stat base.
  *
  * Formula: round(totalBaseStats × 0.15)
@@ -35,5 +44,5 @@ export function getEnglishFlavorText(entries: FlavorTextEntry[]): string {
   const match = [...entries].reverse().find((e) => e.language.name === 'en')
   return match
     ? match.flavor_text.replace(/\f|\n|\r/g, ' ').replace(/\s{2,}/g, ' ').trim()
-    : 'Nessuna descrizione disponibile.'
+    : 'No description available.'
 }
