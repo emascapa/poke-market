@@ -87,7 +87,7 @@ function handleToggleWishlist(event: Event) {
       </div>
 
       <!-- Prezzo -->
-      <p class="pokemon-card__price">${{ price.toFixed(2) }}</p>
+      <p class="pokemon-card__price">€{{ price.toFixed(2) }}</p>
     </div>
 
     <!-- Azioni -->
@@ -96,7 +96,7 @@ function handleToggleWishlist(event: Event) {
       <button
         class="pokemon-card__wishlist-btn"
         :class="{ 'pokemon-card__wishlist-btn--active': wishlisted }"
-        :aria-label="wishlisted ? 'Rimuovi dalla wishlist' : 'Aggiungi alla wishlist'"
+        :aria-label="wishlisted ? 'Remove from wishlist' : 'Add to wishlist'"
         :aria-pressed="wishlisted"
         @click="handleToggleWishlist"
       >
@@ -108,10 +108,10 @@ function handleToggleWishlist(event: Event) {
       <!-- Aggiungi al carrello -->
       <button
         class="pokemon-card__cart-btn"
-        :aria-label="`Aggiungi ${pokemon.name} al carrello`"
+        :aria-label="`Add ${pokemon.name} to cart`"
         @click="handleAddToCart"
       >
-        {{ inCart ? 'Nel carrello ✓' : 'Aggiungi' }}
+        {{ inCart ? 'In cart ✓' : 'Add' }}
       </button>
     </div>
   </article>

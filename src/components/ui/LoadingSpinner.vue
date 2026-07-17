@@ -13,7 +13,7 @@ withDefaults(
     class="spinner"
     :style="{ width: `${size}px`, height: `${size}px` }"
     role="status"
-    aria-label="Caricamento in corso"
+    aria-label="Loading"
   />
 </template>
 

@@ -31,7 +31,7 @@ const emit = defineEmits<{
       class="error-message__btn"
       @click="emit('retry')"
     >
-      Riprova
+      Retry
     </button>
   </div>
 </template>

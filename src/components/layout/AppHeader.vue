@@ -40,7 +40,7 @@ function handleLogout() {
           class="app-header__nav-link app-header__nav-link--all"
           :class="{ 'app-header__nav-link--active': $route.name === 'home' && !$route.query.category }"
         >
-          Tutti
+          All
         </RouterLink>
         <RouterLink
           v-for="type in types"
@@ -59,7 +59,7 @@ function handleLogout() {
         <RouterLink
           :to="{ name: 'cart' }"
           class="app-header__cart"
-          aria-label="`Carrello, ${cartCount} articoli`"
+          :aria-label="`Cart, ${cartCount} items`"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <circle cx="9" cy="21" r="1" />
@@ -84,14 +84,14 @@ function handleLogout() {
           :to="{ name: 'login' }"
           class="app-header__auth-btn"
         >
-          Accedi
+          Sign in
         </RouterLink>
         <button
           v-else
           class="app-header__auth-btn app-header__auth-btn--logout"
           @click="handleLogout"
         >
-          Esci
+          Sign out
         </button>
       </div>
     </div>

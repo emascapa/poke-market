@@ -20,7 +20,7 @@ const emit = defineEmits<{
       :aria-pressed="activeType === null"
       @click="emit('update:activeType', null)"
     >
-      Tutti
+      All
     </button>
 
     <!-- Una pill per ogni tipo -->

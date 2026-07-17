@@ -14,7 +14,7 @@ const client = axios.create({
 
 // PokeAPI restituisce alcuni tipi non standard (es. shadow, unknown) che non
 // sono tipi di battaglia reali. Li escludiamo per non inquinare la navigazione.
-const EXCLUDED_TYPES = new Set(['shadow', 'unknown'])
+const EXCLUDED_TYPES = new Set(['shadow', 'unknown', 'stellar'])
 
 /**
  * Lista paginata di pokemon (solo nome e URL).

@@ -20,28 +20,28 @@ const emit = defineEmits<{
     <button
       class="pagination__btn pagination__btn--prev"
       :disabled="currentPage === 0 || isLoading"
-      :aria-label="`Vai alla pagina ${currentPage}`"
+      :aria-label="`Go to page ${currentPage}`"
       @click="emit('update:page', currentPage - 1)"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
         <polyline points="15 18 9 12 15 6" />
       </svg>
-      Precedente
+      Previous
     </button>
 
-    <!-- Indicatore pagina corrente -->
+    <!-- Current page indicator -->
     <span class="pagination__info" aria-current="page">
-      Pagina {{ currentPage + 1 }} di {{ totalPages }}
+      Page {{ currentPage + 1 }} of {{ totalPages }}
     </span>
 
-    <!-- Successivo -->
+    <!-- Next -->
     <button
       class="pagination__btn pagination__btn--next"
       :disabled="currentPage >= totalPages - 1 || isLoading"
-      :aria-label="`Vai alla pagina ${currentPage + 2}`"
+      :aria-label="`Go to page ${currentPage + 2}`"
       @click="emit('update:page', currentPage + 1)"
     >
-      Successivo
+      Next
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
         <polyline points="9 18 15 12 9 6" />
       </svg>
