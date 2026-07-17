@@ -184,9 +184,11 @@ function addToCart(item: (typeof wishlist.items)[number]) {
     width: 100px;
     height: 100px;
     object-fit: contain;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: auto;
+    image-rendering: -webkit-optimize-contrast;
+    will-change: transform;
     transition: transform var(--transition-base);
+    backface-visibility: hidden;
 
     .wishlist-card:hover & { transform: scale(1.06); }
   }

@@ -80,11 +80,7 @@ const emit = defineEmits<{
       &--#{$name}.type-filter__pill--active {
         background-color: $color;
         border-color: $color;
-        @if $name == 'electric' or $name == 'ice' or $name == 'normal' or $name == 'ground' {
-          color: rgba(0, 0, 0, 0.75);
-        } @else {
-          color: #fff;
-        }
+        color: #fff;
       }
     }
   }

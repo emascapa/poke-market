@@ -308,9 +308,12 @@ watch(() => props.id, loadData, { immediate: true })
     width: 220px;
     height: 220px;
     object-fit: contain;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    /* Rendering smooth per official artwork ad alta risoluzione */
+    image-rendering: auto;
+    image-rendering: -webkit-optimize-contrast;
+    will-change: transform;
     transition: transform var(--transition-slow);
+    backface-visibility: hidden;
 
     &:hover { transform: scale(1.05); }
   }

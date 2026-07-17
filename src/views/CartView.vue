@@ -202,8 +202,8 @@ const isEmpty = computed(() => cart.items.length === 0)
     width: 80px;
     height: 80px;
     object-fit: contain;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: auto;
+    image-rendering: -webkit-optimize-contrast;
   }
 
   &__info {

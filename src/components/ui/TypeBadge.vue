@@ -29,10 +29,6 @@ defineProps<{
   @each $name, $color in $type-colors {
     &--#{$name} {
       background-color: $color;
-      /* Testo scuro per i tipi chiari */
-      @if $name == 'electric' or $name == 'ice' or $name == 'normal' or $name == 'ground' {
-        color: rgba(0, 0, 0, 0.75);
-      }
     }
   }
 }

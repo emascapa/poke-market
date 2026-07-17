@@ -154,9 +154,16 @@ function handleToggleWishlist(event: Event) {
     width: 120px;
     height: 120px;
     object-fit: contain;
+    /* La resa bicubica predefinita (auto) è ottimale per l'official artwork in alta risoluzione.
+       pixelated/crisp-edges usavano nearest-neighbor che causa l'effetto "impastato" su immagini smooth. */
+    image-rendering: auto;
+    /* Safari: forza downscaling nitido invece dello smooth blur */
+    image-rendering: -webkit-optimize-contrast;
+    /* Promuove l'immagine su GPU layer, riduce il sub-pixel blurring durante le animazioni */
+    will-change: transform;
     transition: transform var(--transition-base);
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    /* Previene artifatti di antialiasing ai bordi del contenitore */
+    backface-visibility: hidden;
 
     .pokemon-card:hover & {
       transform: scale(1.08);
