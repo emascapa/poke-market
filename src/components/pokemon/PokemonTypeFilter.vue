@@ -107,6 +107,8 @@ function toggle(typeName: string) {
 
   &__pill {
     position: relative;
+    display: inline-flex;
+    align-items: center;
     padding: $space-1 $space-4;
     border: 1.5px solid var(--color-border);
     border-radius: $radius-full;
@@ -134,28 +136,12 @@ function toggle(typeName: string) {
       color: #fff;
     }
 
-    /* Secondo tipo selezionato: outlined (bordo colorato, sfondo trasparente) */
-    &--active#{&}--second {
-      background-color: transparent;
-      color: var(--color-primary);
-      border-color: var(--color-primary);
-      border-width: 2px;
-    }
-
     /* Genera colori per ogni tipo */
     @each $name, $color in $type-colors {
-      &--#{$name}#{&}--active:not(#{&}--second) {
+      &--#{$name}#{&}--active {
         background-color: $color;
         border-color: $color;
         color: #fff;
-      }
-
-      /* Secondo tipo: solo bordo colorato */
-      &--#{$name}#{&}--active#{&}--second {
-        background-color: transparent;
-        border-color: $color;
-        border-width: 2px;
-        color: $color;
       }
     }
   }
@@ -172,7 +158,7 @@ function toggle(typeName: string) {
     background: rgba(0, 0, 0, 0.2);
     font-size: 9px;
     font-weight: $font-weight-bold;
-    vertical-align: middle;
+    line-height: 14px;
   }
 
   /* Label combinazione es. "fire + flying" */

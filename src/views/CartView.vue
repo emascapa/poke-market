@@ -49,6 +49,8 @@ const isEmpty = computed(() => cart.items.length === 0)
                 class="cart-item__image"
                 width="80"
                 height="80"
+                loading="lazy"
+                decoding="async"
               />
             </button>
 
@@ -203,7 +205,7 @@ const isEmpty = computed(() => cart.items.length === 0)
     height: 80px;
     object-fit: contain;
     image-rendering: auto;
-    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
   }
 
   &__info {

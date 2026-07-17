@@ -63,7 +63,7 @@ function handleLogout() {
     <div class="app-header__inner">
       <!-- Logo e nome store -->
       <RouterLink class="app-header__brand" :to="{ name: 'home' }" aria-label="Poke Market — Home">
-        <img :src="logoUrl" alt="Logo Poke Market" class="app-header__logo" width="36" height="36" />
+        <img :src="logoUrl" alt="Logo Poke Market" class="app-header__logo" width="50" height="50" />
         <span class="app-header__name">PokéMarket</span>
       </RouterLink>
 

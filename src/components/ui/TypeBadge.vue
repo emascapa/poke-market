@@ -22,6 +22,8 @@ defineProps<{
   color: #fff;
   text-transform: capitalize;
   letter-spacing: 0.5px;
+  line-height: 1.4;
+  vertical-align: middle;
   /* Colore di fallback se il tipo non è nel design system */
   background-color: $type-normal;
 
