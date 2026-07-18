@@ -76,7 +76,11 @@ async function loadData() {
     pokemon.value = p
 
     /* Carica la specie per ottenere la descrizione testuale */
-    species.value = await fetchPokemonSpecies(id)
+    try {
+      species.value = await fetchPokemonSpecies(id)
+    } catch {
+      species.value = null
+    }
   } catch (e) {
     error.value = getApiErrorMessage(e)
   } finally {
@@ -159,9 +163,9 @@ watch(() => props.id, loadData, { immediate: true })
           <p class="detail-card__price">€{{ price.toFixed(2) }}</p>
 
           <!-- Descrizione dalla specie -->
-          <div v-if="description" class="detail-card__about">
+          <div class="detail-card__about">
             <h2 class="detail-card__about-title">About</h2>
-            <p class="detail-card__description">{{ description }}</p>
+            <p class="detail-card__description">{{ description || 'No info found' }}</p>
           </div>
 
           <!-- Dati fisici -->
@@ -417,7 +421,7 @@ watch(() => props.id, loadData, { immediate: true })
 
   &__stat-row {
     display: grid;
-    grid-template-columns: 80px 40px 1fr;
+    grid-template-columns: 60px 40px 1fr;
     align-items: center;
     gap: $space-3;
   }
@@ -425,7 +429,7 @@ watch(() => props.id, loadData, { immediate: true })
   &__stat-name {
     font-size: $font-size-sm;
     color: var(--color-text-muted);
-    text-align: right;
+    text-align: left;
     font-weight: $font-weight-medium;
   }
 
