@@ -10,7 +10,7 @@ import { extractPokemonIdFromUrl } from '@/utils/priceCalculator'
 import { getApiErrorMessage } from '@/utils/apiError'
 import type { NamedAPIResource, Pokemon, PokemonListItem } from '@/types/pokemon'
 
-const PAGINA_SIZE = 20
+const PAGINA_SIZE = 24
 
 export const usePokemonStore = defineStore('pokemon', () => {
   // ----------------------------------------------------------------

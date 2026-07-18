@@ -11,6 +11,7 @@ import TypeBadge from '@/components/ui/TypeBadge.vue'
 const props = defineProps<{
   pokemon: Pokemon
   price: number
+  isShiny?: boolean
 }>()
 
 const router = useRouter()
@@ -18,7 +19,7 @@ const cart = useCartStore()
 const wishlist = useWishlistStore()
 const auth = useAuthStore()
 
-const image = computed(() => getPokemonImage(props.pokemon.sprites))
+const image = computed(() => getPokemonImage(props.pokemon.sprites, props.isShiny))
 const wishlisted = computed(() => wishlist.isWishlisted(props.pokemon.id))
 const inCart = computed(() => cart.items.some((i) => i.pokemon.id === props.pokemon.id))
 
@@ -66,6 +67,7 @@ function handleToggleWishlist(event: Event) {
         width="200"
         height="200"
       />
+      <span v-if="isShiny" class="pokemon-card__shiny-badge" aria-label="Today Shiny!">✨ Today Shiny!</span>
       <span v-if="inCart" class="pokemon-card__cart-badge" aria-label="Already in cart">
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="1.5,6 4.5,9 10.5,3" />
@@ -179,6 +181,33 @@ function handleToggleWishlist(event: Event) {
 
     .pokemon-card:hover & {
       transform: scale(1.12) rotate(-1deg);
+    }
+  }
+
+  &__shiny-badge {
+    position: absolute;
+    top: $space-3;
+    left: -$space-1;
+    padding: $space-1 $space-3 $space-1 $space-2;
+    background: linear-gradient(135deg, #f9a825 0%, #ff6f00 100%);
+    color: #fff;
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.4px;
+    border-radius: 0 $radius-base $radius-base 0;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1.4;
+
+    /* Orecchietta sinistra */
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      border-top: 6px solid #e65100;
+      border-left: 4px solid transparent;
     }
   }
 

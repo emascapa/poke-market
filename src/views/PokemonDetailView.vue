@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth'
 import { fetchPokemonSpecies } from '@/services/pokeApi'
 import { calculatePrice, getPokemonImage, getEnglishFlavorText } from '@/utils/priceCalculator'
 import { getApiErrorMessage } from '@/utils/apiError'
+import { useDailyShiny } from '@/composables/useDailyShiny'
 import type { Pokemon, PokemonSpecies } from '@/types/pokemon'
 import TypeBadge from '@/components/ui/TypeBadge.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
@@ -21,6 +22,7 @@ const pokemonStore = usePokemonStore()
 const cart = useCartStore()
 const wishlist = useWishlistStore()
 const auth = useAuthStore()
+const { shinyIds } = useDailyShiny()
 
 const pokemon = ref<Pokemon | null>(null)
 const species = ref<PokemonSpecies | null>(null)
@@ -28,7 +30,8 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 
 const price = computed(() => (pokemon.value ? calculatePrice(pokemon.value.stats) : 0))
-const image = computed(() => (pokemon.value ? getPokemonImage(pokemon.value.sprites) : ''))
+const isShiny = computed(() => (pokemon.value ? shinyIds.value.has(pokemon.value.id) : false))
+const image = computed(() => (pokemon.value ? getPokemonImage(pokemon.value.sprites, isShiny.value) : ''))
 const description = computed(() =>
   species.value ? getEnglishFlavorText(species.value.flavor_text_entries) : '',
 )
@@ -138,6 +141,7 @@ watch(() => props.id, loadData, { immediate: true })
         <!-- Colonna immagine -->
         <div class="detail-card__image-col">
           <div class="detail-card__image-wrap">
+            <span v-if="isShiny" class="detail-card__shiny-badge" aria-label="Today Shiny!">✨ Today Shiny!</span>
             <img
               :src="image"
               :alt="pokemon.name"
@@ -310,6 +314,34 @@ watch(() => props.id, loadData, { immediate: true })
     padding: $space-6;
     width: 100%;
     @include flex-center;
+    position: relative;
+  }
+
+  &__shiny-badge {
+    position: absolute;
+    top: $space-4;
+    left: -$space-1;
+    padding: $space-2 $space-4 $space-2 $space-3;
+    background: linear-gradient(135deg, #f9a825 0%, #ff6f00 100%);
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.4px;
+    border-radius: 0 $radius-base $radius-base 0;
+    box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1.4;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 0;
+      border-top: 7px solid #e65100;
+      border-left: 5px solid transparent;
+    }
   }
 
   &__image {
