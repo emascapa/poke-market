@@ -49,7 +49,6 @@ function handleToggleWishlist(event: Event) {
 <template>
   <article
     class="pokemon-card"
-    :class="{ 'pokemon-card--in-cart': inCart }"
     tabindex="0"
     role="button"
     :aria-label="`${pokemon.name}, $${price}`"
@@ -67,6 +66,11 @@ function handleToggleWishlist(event: Event) {
         width="200"
         height="200"
       />
+      <span v-if="inCart" class="pokemon-card__cart-badge" aria-label="Already in cart">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="1.5,6 4.5,9 10.5,3" />
+        </svg>
+      </span>
     </div>
 
     <!-- Corpo della card -->
@@ -111,7 +115,7 @@ function handleToggleWishlist(event: Event) {
         :aria-label="`Add ${pokemon.name} to cart`"
         @click="handleAddToCart"
       >
-        {{ inCart ? 'In cart ✓' : 'Add' }}
+        Add
       </button>
     </div>
   </article>
@@ -127,27 +131,35 @@ function handleToggleWishlist(event: Event) {
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
+  /* Easing con leggero rimbalzo per la card */
+  transition:
+    box-shadow var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1),
+    outline-color var(--transition-fast);
 
-  /* Animazione hover */
   &:hover,
   &:focus-visible {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--shadow-card-hover);
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 
-  &--in-cart {
-    outline: 2px solid var(--color-success);
-    outline-offset: 2px;
-  }
+
 
   /* Area immagine con sfondo sfumato */
   &__image-wrap {
+    position: relative;
     background: linear-gradient(135deg, var(--color-border) 0%, var(--color-bg) 100%);
     padding: $space-5;
     @include flex-center;
     min-height: 160px;
+    /* Preparazione per il fade del gradiente sull'hover */
+    transition: background var(--transition-slow);
+
+    .pokemon-card:hover & {
+      background: linear-gradient(135deg, var(--color-border) 0%, var(--color-bg-card) 100%);
+    }
   }
 
   &__image {
@@ -161,12 +173,31 @@ function handleToggleWishlist(event: Event) {
     image-rendering: -webkit-optimize-contrast;
     /* Promuove l'immagine su GPU layer, riduce il sub-pixel blurring durante le animazioni */
     will-change: transform;
-    transition: transform var(--transition-base);
+    transition: transform var(--transition-base) cubic-bezier(0.34, 1.56, 0.64, 1);
     /* Previene artifatti di antialiasing ai bordi del contenitore */
     backface-visibility: hidden;
 
     .pokemon-card:hover & {
-      transform: scale(1.08);
+      transform: scale(1.12) rotate(-1deg);
+    }
+  }
+
+  &__cart-badge {
+    position: absolute;
+    top: $space-2;
+    right: $space-2;
+    width: 22px;
+    height: 22px;
+    background-color: var(--color-success);
+    color: #fff;
+    border-radius: $radius-full;
+    @include flex-center;
+    pointer-events: none;
+
+    svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
     }
   }
 

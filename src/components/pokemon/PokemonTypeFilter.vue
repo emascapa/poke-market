@@ -163,6 +163,8 @@ function toggle(typeName: string) {
 
   /* Label combinazione es. "fire + flying" */
   &__combo {
+    display: inline-flex;
+    align-items: center;
     padding: $space-1 $space-3;
     border-radius: $radius-full;
     background: var(--color-border);
@@ -172,6 +174,7 @@ function toggle(typeName: string) {
     text-transform: capitalize;
     white-space: nowrap;
     border: 1px dashed var(--color-text-muted);
+    line-height: 1.4;
   }
 }
 </style>

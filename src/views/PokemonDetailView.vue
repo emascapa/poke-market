@@ -7,6 +7,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useAuthStore } from '@/stores/auth'
 import { fetchPokemonSpecies } from '@/services/pokeApi'
 import { calculatePrice, getPokemonImage, getEnglishFlavorText } from '@/utils/priceCalculator'
+import { getApiErrorMessage } from '@/utils/apiError'
 import type { Pokemon, PokemonSpecies } from '@/types/pokemon'
 import TypeBadge from '@/components/ui/TypeBadge.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
@@ -76,8 +77,8 @@ async function loadData() {
 
     /* Carica la specie per ottenere la descrizione testuale */
     species.value = await fetchPokemonSpecies(id)
-  } catch {
-    error.value = 'Failed to load data. Please try again.'
+  } catch (e) {
+    error.value = getApiErrorMessage(e)
   } finally {
     isLoading.value = false
   }
@@ -225,12 +226,12 @@ watch(() => props.id, loadData, { immediate: true })
 
             <button
               class="detail-card__cart-btn"
-              :class="{ 'detail-card__cart-btn--added': inCart }"
               :aria-label="`Add ${pokemon.name} to cart`"
               @click="handleAddToCart"
             >
-              {{ inCart ? 'In cart ✓' : 'Add to cart' }}
+              Add to cart
             </button>
+            <span v-if="inCart" class="detail-card__in-cart-badge">✓ In cart</span>
           </div>
         </div>
       </article>
@@ -451,6 +452,7 @@ watch(() => props.id, loadData, { immediate: true })
   /* Azioni */
   &__actions {
     display: flex;
+    align-items: center;
     gap: $space-3;
     margin-top: auto;
     padding-top: $space-4;
@@ -508,9 +510,18 @@ watch(() => props.id, loadData, { immediate: true })
       outline: none;
     }
 
-    &--added {
-      background-color: var(--color-success);
-    }
+  }
+
+  &__in-cart-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: $space-2 $space-4;
+    border-radius: $radius-full;
+    background-color: var(--color-success);
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
   }
 }
 </style>
