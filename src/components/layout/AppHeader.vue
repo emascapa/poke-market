@@ -174,22 +174,23 @@ const { theme, toggleTheme } = useTheme()
           </svg>
         </button>
 
-        <!-- Login / Logout -->
-        <RouterLink
-          v-if="!isAuthenticated"
-          :to="{ name: 'login' }"
-          class="app-header__auth-btn"
-        >
-          Sign in
-        </RouterLink>
-        <button
-          v-else
-          class="app-header__auth-btn app-header__auth-btn--logout"
-          @click="handleLogout"
-        >
-          Sign out
-        </button>
       </div>
+
+      <!-- Login / Logout -->
+      <RouterLink
+        v-if="!isAuthenticated"
+        :to="{ name: 'login' }"
+        class="app-header__auth-btn"
+      >
+        Sign in
+      </RouterLink>
+      <button
+        v-else
+        class="app-header__auth-btn app-header__auth-btn--logout"
+        @click="handleLogout"
+      >
+        Sign out
+      </button>
     </div>
   </header>
 </template>
@@ -451,6 +452,44 @@ const { theme, toggleTheme } = useTheme()
       background-color: var(--color-border);
       color: var(--color-primary);
       outline: none;
+    }
+  }
+
+  /* Layout a due righe per schermi < 575px:
+     riga 1 → brand | types-menu | auth-btn
+     riga 2 → actions (cart/wishlist/darkMode), allineate a destra */
+  @media (max-width: 575px) {
+    &__inner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+      height: auto;
+      padding: $space-2 $space-3;
+      gap: $space-2;
+    }
+
+    &__brand {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    &__types-menu {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &__auth-btn {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: end;
+    }
+
+    &__actions {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: center;
+      gap: $space-2;
     }
   }
 
