@@ -69,7 +69,10 @@ function onPageChange(page: number) {
 /* Reagisce ai cambiamenti dell'URL (deep link e navigazione) */
 watch(
   () => route.query.category,
-  () => fetchPage(0, activeTypes.value),
+  () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    fetchPage(0, activeTypes.value)
+  },
 )
 
 onMounted(async () => {

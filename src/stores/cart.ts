@@ -1,10 +1,15 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { calculatePrice } from '@/utils/priceCalculator'
 import type { CartItem, Pokemon } from '@/types/pokemon'
 
+const CART_KEY = 'poke_market_cart'
+
 export const useCartStore = defineStore('cart', () => {
-  const items = ref<CartItem[]>([])
+  const stored = localStorage.getItem(CART_KEY)
+  const items = ref<CartItem[]>(stored ? (JSON.parse(stored) as CartItem[]) : [])
+
+  watch(items, (val) => localStorage.setItem(CART_KEY, JSON.stringify(val)), { deep: true })
 
   /** Numero totale di articoli nel carrello (somma delle quantità). */
   const totalItems = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))

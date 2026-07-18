@@ -1,10 +1,15 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { calculatePrice } from '@/utils/priceCalculator'
 import type { Pokemon, WishlistItem } from '@/types/pokemon'
 
+const WISHLIST_KEY = 'poke_market_wishlist'
+
 export const useWishlistStore = defineStore('wishlist', () => {
-  const items = ref<WishlistItem[]>([])
+  const stored = localStorage.getItem(WISHLIST_KEY)
+  const items = ref<WishlistItem[]>(stored ? (JSON.parse(stored) as WishlistItem[]) : [])
+
+  watch(items, (val) => localStorage.setItem(WISHLIST_KEY, JSON.stringify(val)), { deep: true })
 
   /** Numero di pokemon salvati nella wishlist. */
   const totalItems = computed(() => items.value.length)
