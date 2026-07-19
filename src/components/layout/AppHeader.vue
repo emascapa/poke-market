@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { usePokemonStore } from '@/stores/pokemon'
+import { useTheme } from '@/composables/useTheme'
 import logoUrl from '@/assets/images/logo.png'
 
 const router = useRouter()
@@ -56,6 +57,8 @@ function handleLogout() {
   auth.logout()
   router.push({ name: 'home' })
 }
+
+const { theme, toggleTheme } = useTheme()
 </script>
 
 <template>
@@ -135,7 +138,7 @@ function handleLogout() {
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
-          <span v-if="cartCount > 0" class="app-header__cart-badge" aria-live="polite">
+          <span v-if="cartCount > 0 && isAuthenticated" class="app-header__cart-badge" aria-live="polite">
             {{ cartCount > 99 ? '99+' : cartCount }}
           </span>
         </RouterLink>
@@ -147,22 +150,47 @@ function handleLogout() {
           </svg>
         </RouterLink>
 
-        <!-- Login / Logout -->
-        <RouterLink
-          v-if="!isAuthenticated"
-          :to="{ name: 'login' }"
-          class="app-header__auth-btn"
-        >
-          Sign in
-        </RouterLink>
+        <!-- Toggle tema chiaro/scuro -->
         <button
-          v-else
-          class="app-header__auth-btn app-header__auth-btn--logout"
-          @click="handleLogout"
+          class="app-header__theme-btn"
+          :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          @click="toggleTheme"
         >
-          Sign out
+          <!-- Icona sole (light mode) -->
+          <svg v-if="theme === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <!-- Icona luna (dark mode) -->
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
         </button>
+
       </div>
+
+      <!-- Login / Logout -->
+      <RouterLink
+        v-if="!isAuthenticated"
+        :to="{ name: 'login' }"
+        class="app-header__auth-btn"
+      >
+        Sign in
+      </RouterLink>
+      <button
+        v-else
+        class="app-header__auth-btn app-header__auth-btn--logout"
+        @click="handleLogout"
+      >
+        Sign out
+      </button>
     </div>
   </header>
 </template>
@@ -398,6 +426,70 @@ function handleLogout() {
         background-color: var(--color-text-muted);
         color: #fff;
       }
+    }
+  }
+
+  /* Pulsante tema chiaro/scuro */
+  &__theme-btn {
+    @include flex-center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: $radius-base;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--color-border);
+      color: var(--color-primary);
+      outline: none;
+    }
+  }
+
+  /* Layout a due righe per schermi < 575px:
+     riga 1 → brand | types-menu | auth-btn
+     riga 2 → actions (cart/wishlist/darkMode), allineate a destra */
+  @media (max-width: 575px) {
+    &__inner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+      height: auto;
+      padding: $space-2 $space-3;
+      gap: $space-2;
+    }
+
+    &__brand {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    &__types-menu {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &__auth-btn {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: end;
+    }
+
+    &__actions {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: center;
+      gap: $space-2;
     }
   }
 

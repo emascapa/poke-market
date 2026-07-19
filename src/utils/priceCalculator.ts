@@ -26,8 +26,18 @@ export function calculatePrice(stats: PokemonStat[]): number {
 /**
  * Restituisce il miglior URL immagine disponibile per un pokemon.
  * Preferisce l'artwork ufficiale; fallback allo sprite frontale, poi a un placeholder.
+ * Se `shiny` è true usa la variante shiny (official-artwork → sprite → placeholder).
  */
-export function getPokemonImage(sprites: Pokemon['sprites']): string {
+export function getPokemonImage(sprites: Pokemon['sprites'], shiny = false): string {
+  if (shiny) {
+    return (
+      sprites.other['official-artwork'].front_shiny ??
+      sprites.front_shiny ??
+      sprites.other['official-artwork'].front_default ??
+      sprites.front_default ??
+      '/img/placeholder-pokemon.png'
+    )
+  }
   return (
     sprites.other['official-artwork'].front_default ??
     sprites.front_default ??

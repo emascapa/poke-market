@@ -7,9 +7,10 @@ import {
   fetchTypes,
 } from '@/services/pokeApi'
 import { extractPokemonIdFromUrl } from '@/utils/priceCalculator'
+import { getApiErrorMessage } from '@/utils/apiError'
 import type { NamedAPIResource, Pokemon, PokemonListItem } from '@/types/pokemon'
 
-const PAGINA_SIZE = 20
+const PAGINA_SIZE = 24
 
 export const usePokemonStore = defineStore('pokemon', () => {
   // ----------------------------------------------------------------
@@ -106,7 +107,7 @@ export const usePokemonStore = defineStore('pokemon', () => {
         pokemonList.value = response.results
       }
     } catch (e) {
-      error.value = 'Error loading Pokémon. Please try again.'
+      error.value = getApiErrorMessage(e)
       console.error(e)
     } finally {
       isLoading.value = false

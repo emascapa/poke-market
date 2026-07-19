@@ -8,6 +8,8 @@ defineProps<{
   isLoading: boolean
   /** Numero di skeleton card da mostrare durante il caricamento */
   skeletonCount?: number
+  /** ID dei pokemon shiny del giorno */
+  shinyIds?: Set<number>
 }>()
 
 // Il numero di skeleton deve combaciare con i pokemon per pagina (20 di default)
@@ -45,6 +47,7 @@ const DEFAULT_SKELETON_COUNT = 20
         :key="pokemon.id"
         :pokemon="pokemon"
         :price="calculatePrice(pokemon.stats)"
+        :is-shiny="shinyIds?.has(pokemon.id) ?? false"
       />
     </template>
   </section>

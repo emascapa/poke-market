@@ -3,10 +3,12 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { getPokemonImage } from '@/utils/priceCalculator'
+import { useDailyShiny } from '@/composables/useDailyShiny'
 import TypeBadge from '@/components/ui/TypeBadge.vue'
 
 const router = useRouter()
 const cart = useCartStore()
+const { shinyIds } = useDailyShiny()
 
 const isEmpty = computed(() => cart.items.length === 0)
 </script>
@@ -44,7 +46,7 @@ const isEmpty = computed(() => cart.items.length === 0)
               @click="router.push({ name: 'pokemon-detail', params: { id: item.pokemon.id } })"
             >
               <img
-                :src="getPokemonImage(item.pokemon.sprites)"
+                :src="getPokemonImage(item.pokemon.sprites, shinyIds.has(item.pokemon.id))"
                 :alt="item.pokemon.name"
                 class="cart-item__image"
                 width="80"

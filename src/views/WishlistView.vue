@@ -54,6 +54,7 @@ function addToCart(item: (typeof wishlist.items)[number]) {
               :alt="item.pokemon.name"
               class="wishlist-card__image"
               loading="lazy"
+              decoding="async"
               width="100"
               height="100"
             />
@@ -185,7 +186,7 @@ function addToCart(item: (typeof wishlist.items)[number]) {
     height: 100px;
     object-fit: contain;
     image-rendering: auto;
-    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
     will-change: transform;
     transition: transform var(--transition-base);
     backface-visibility: hidden;

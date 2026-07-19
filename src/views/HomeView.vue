@@ -8,10 +8,12 @@ import PokemonTypeFilter from '@/components/pokemon/PokemonTypeFilter.vue'
 import PokemonPagination from '@/components/pokemon/PokemonPagination.vue'
 import ErrorMessage from '@/components/ui/ErrorMessage.vue'
 import { extractPokemonIdFromUrl } from '@/utils/priceCalculator'
+import { useDailyShiny } from '@/composables/useDailyShiny'
 
 const route = useRoute()
 const router = useRouter()
 const store = usePokemonStore()
+const { shinyIds } = useDailyShiny()
 
 /* Pokemon con dettagli completi pronti per PokemonGrid */
 const loadedPokemons = ref<Pokemon[]>([])
@@ -69,7 +71,10 @@ function onPageChange(page: number) {
 /* Reagisce ai cambiamenti dell'URL (deep link e navigazione) */
 watch(
   () => route.query.category,
-  () => fetchPage(0, activeTypes.value),
+  () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    fetchPage(0, activeTypes.value)
+  },
 )
 
 onMounted(async () => {
@@ -97,7 +102,7 @@ onMounted(async () => {
       />
 
       <template v-else>
-        <PokemonGrid :pokemons="loadedPokemons" :is-loading="isLoading" />
+        <PokemonGrid :pokemons="loadedPokemons" :is-loading="isLoading" :shiny-ids="shinyIds" />
 
         <!-- Paginazione -->
         <PokemonPagination
